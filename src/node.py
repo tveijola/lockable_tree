@@ -15,8 +15,27 @@ class Node:
         self.r_child = Node(parent=self)
 
     def lock(self):
-        self.locked = True
-        self.inform_ancestors(locked=True)
+        # Check locking condition
+        # - No locked ancestors
+        # - No locked descendants
+        ancestor_locked = self.check_ancestors()
+
+        if not(ancestor_locked or self.left_des_locked or self.right_des_locked):
+            self.locked = True
+            self.inform_ancestors(locked=True)
+
+    def unlock(self):
+        self.locked = False
+        self.inform_ancestors(locked=False)
+
+    def check_ancestors(self):
+        if self.parent is None:
+            return self.locked
+        else:
+            if self.locked:
+                return self.locked
+            else:
+                return self.check_ancestors()
 
     def inform_ancestors(self, locked=False):
         if self.parent is None:
@@ -26,3 +45,7 @@ class Node:
         elif self.parent.r_child == self:
             self.parent.right_des_locked = locked
         self.parent.inform_ancestors(locked)
+
+
+if __name__ == '__main__':
+    rootNode = Node()
